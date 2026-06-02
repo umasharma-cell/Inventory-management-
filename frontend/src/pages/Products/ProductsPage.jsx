@@ -2,6 +2,7 @@ import { Edit, Plus, Trash2 } from 'lucide-react';
 import { useEffect, useState } from 'react';
 
 import Button from '../../components/common/Button.jsx';
+import ConfirmDialog from '../../components/common/ConfirmDialog.jsx';
 import EmptyState from '../../components/common/EmptyState.jsx';
 import ErrorBanner from '../../components/common/ErrorBanner.jsx';
 import LoadingState from '../../components/common/LoadingState.jsx';
@@ -21,8 +22,10 @@ export default function ProductsPage() {
   const [search, setSearch] = useState('');
   const [loading, setLoading] = useState(true);
   const [submitting, setSubmitting] = useState(false);
+  const [deleting, setDeleting] = useState(false);
   const [error, setError] = useState(null);
   const [modalProduct, setModalProduct] = useState(null);
+  const [productToDelete, setProductToDelete] = useState(null);
 
   async function loadProducts(nextPage = page) {
     setLoading(true);
@@ -62,21 +65,25 @@ export default function ProductsPage() {
     }
   }
 
-  async function handleDelete(product) {
-    if (!window.confirm(`Delete ${product.name}?`)) return;
+  async function handleDelete() {
+    if (!productToDelete) return;
+    setDeleting(true);
     try {
-      await productApi.remove(product.id);
+      await productApi.remove(productToDelete.id);
       notify('Product deleted');
+      setProductToDelete(null);
       await loadProducts(page);
     } catch (err) {
       notify(err.message, 'error');
+    } finally {
+      setDeleting(false);
     }
   }
 
   const columns = [
     { key: 'name', header: 'Name' },
     { key: 'sku', header: 'SKU' },
-    { key: 'price', header: 'Price', render: (row) => `₹${Number(row.price).toLocaleString()}` },
+    { key: 'price', header: 'Price', render: (row) => `Rs ${Number(row.price).toLocaleString()}` },
     { key: 'quantity_in_stock', header: 'Stock' },
     {
       key: 'actions',
@@ -86,7 +93,7 @@ export default function ProductsPage() {
           <Button variant="ghost" className="icon-btn" onClick={() => setModalProduct(row)}>
             <Edit size={16} aria-hidden="true" />
           </Button>
-          <Button variant="danger" className="icon-btn" onClick={() => handleDelete(row)}>
+          <Button variant="danger" className="icon-btn" onClick={() => setProductToDelete(row)}>
             <Trash2 size={16} aria-hidden="true" />
           </Button>
         </div>
@@ -142,6 +149,19 @@ export default function ProductsPage() {
           onSubmit={handleSubmit}
         />
       </Modal>
+      <ConfirmDialog
+        open={productToDelete !== null}
+        title="Delete Product"
+        message={
+          productToDelete
+            ? `Delete ${productToDelete.name}? This action cannot be undone.`
+            : ''
+        }
+        confirmLabel="Delete Product"
+        loading={deleting}
+        onCancel={() => setProductToDelete(null)}
+        onConfirm={handleDelete}
+      />
     </>
   );
 }
