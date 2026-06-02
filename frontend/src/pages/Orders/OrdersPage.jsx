@@ -1,7 +1,9 @@
 import { Eye, Plus, Trash2 } from 'lucide-react';
 import { useEffect, useState } from 'react';
+import { Link } from 'react-router-dom';
 
 import Button from '../../components/common/Button.jsx';
+import ConfirmDialog from '../../components/common/ConfirmDialog.jsx';
 import EmptyState from '../../components/common/EmptyState.jsx';
 import ErrorBanner from '../../components/common/ErrorBanner.jsx';
 import LoadingState from '../../components/common/LoadingState.jsx';
@@ -11,7 +13,6 @@ import Pagination from '../../components/common/Pagination.jsx';
 import Table from '../../components/common/Table.jsx';
 import { useNotifications } from '../../context/NotificationContext.jsx';
 import { customerApi, orderApi, productApi } from '../../services/api.js';
-import OrderDetail from './OrderDetail.jsx';
 import OrderForm from './OrderForm.jsx';
 
 export default function OrdersPage() {
@@ -23,9 +24,10 @@ export default function OrdersPage() {
   const [page, setPage] = useState(1);
   const [loading, setLoading] = useState(true);
   const [submitting, setSubmitting] = useState(false);
+  const [deleting, setDeleting] = useState(false);
   const [error, setError] = useState(null);
   const [formOpen, setFormOpen] = useState(false);
-  const [selectedOrder, setSelectedOrder] = useState(null);
+  const [orderToDelete, setOrderToDelete] = useState(null);
 
   async function loadOrders(nextPage = page) {
     setLoading(true);
@@ -69,14 +71,18 @@ export default function OrdersPage() {
     }
   }
 
-  async function handleDelete(order) {
-    if (!window.confirm(`Delete order ${order.id.slice(0, 8)}?`)) return;
+  async function handleDelete() {
+    if (!orderToDelete) return;
+    setDeleting(true);
     try {
-      await orderApi.remove(order.id);
+      await orderApi.remove(orderToDelete.id);
       notify('Order deleted');
+      setOrderToDelete(null);
       await Promise.all([loadOrders(page), loadFormData()]);
     } catch (err) {
       notify(err.message, 'error');
+    } finally {
+      setDeleting(false);
     }
   }
 
@@ -91,17 +97,17 @@ export default function OrdersPage() {
     {
       key: 'total_amount',
       header: 'Total',
-      render: (row) => `₹${Number(row.total_amount).toLocaleString()}`,
+      render: (row) => `Rs ${Number(row.total_amount).toLocaleString()}`,
     },
     {
       key: 'actions',
       header: 'Actions',
       render: (row) => (
         <div className="row-actions">
-          <Button variant="ghost" className="icon-btn" onClick={() => setSelectedOrder(row)}>
+          <Button as={Link} to={`/orders/${row.id}`} variant="ghost" className="icon-btn">
             <Eye size={16} aria-hidden="true" />
           </Button>
-          <Button variant="danger" className="icon-btn" onClick={() => handleDelete(row)}>
+          <Button variant="danger" className="icon-btn" onClick={() => setOrderToDelete(row)}>
             <Trash2 size={16} aria-hidden="true" />
           </Button>
         </div>
@@ -147,13 +153,19 @@ export default function OrdersPage() {
           onSubmit={handleCreateOrder}
         />
       </Modal>
-      <Modal
-        open={selectedOrder !== null}
-        title="Order Detail"
-        onClose={() => setSelectedOrder(null)}
-      >
-        <OrderDetail order={selectedOrder} />
-      </Modal>
+      <ConfirmDialog
+        open={orderToDelete !== null}
+        title="Delete Order"
+        message={
+          orderToDelete
+            ? `Delete order ${orderToDelete.id.slice(0, 8)}? Stock quantities will be restored.`
+            : ''
+        }
+        confirmLabel="Delete Order"
+        loading={deleting}
+        onCancel={() => setOrderToDelete(null)}
+        onConfirm={handleDelete}
+      />
     </>
   );
 }

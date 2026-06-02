@@ -3,6 +3,7 @@ import { Navigate, Route, Routes } from 'react-router-dom';
 import AppLayout from './components/Layout/AppLayout.jsx';
 import CustomersPage from './pages/Customers/CustomersPage.jsx';
 import DashboardPage from './pages/Dashboard/DashboardPage.jsx';
+import OrderDetailPage from './pages/Orders/OrderDetailPage.jsx';
 import OrdersPage from './pages/Orders/OrdersPage.jsx';
 import ProductsPage from './pages/Products/ProductsPage.jsx';
 
@@ -15,6 +16,7 @@ export default function App() {
         <Route path="/products" element={<ProductsPage />} />
         <Route path="/customers" element={<CustomersPage />} />
         <Route path="/orders" element={<OrdersPage />} />
+        <Route path="/orders/:orderId" element={<OrderDetailPage />} />
       </Route>
     </Routes>
   );

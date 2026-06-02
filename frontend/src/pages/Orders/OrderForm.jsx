@@ -121,7 +121,7 @@ export default function OrderForm({ customers, products, onSubmit, onCancel, sub
 
       <div className="total-preview">
         <span>Live total preview</span>
-        <strong>₹{previewTotal.toLocaleString()}</strong>
+        <strong>Rs {previewTotal.toLocaleString()}</strong>
       </div>
 
       <div className="form-actions">

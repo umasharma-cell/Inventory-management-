@@ -14,7 +14,7 @@ export default function OrderDetail({ order }) {
         </div>
         <div>
           <dt>Total Amount</dt>
-          <dd>₹{Number(order.total_amount).toLocaleString()}</dd>
+          <dd>Rs {Number(order.total_amount).toLocaleString()}</dd>
         </div>
       </dl>
       <div className="table-wrap">
@@ -33,7 +33,7 @@ export default function OrderDetail({ order }) {
                 <td>{item.product.name}</td>
                 <td>{item.product.sku}</td>
                 <td>{item.quantity}</td>
-                <td>₹{Number(item.unit_price).toLocaleString()}</td>
+                <td>Rs {Number(item.unit_price).toLocaleString()}</td>
               </tr>
             ))}
           </tbody>

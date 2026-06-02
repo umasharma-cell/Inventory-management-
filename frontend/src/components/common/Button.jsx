@@ -4,16 +4,21 @@ export default function Button({
   disabled = false,
   variant = 'primary',
   type = 'button',
+  as: Component = 'button',
   ...props
 }) {
+  const componentProps =
+    Component === 'button'
+      ? { disabled, type }
+      : { 'aria-disabled': disabled ? 'true' : undefined };
+
   return (
-    <button
+    <Component
       className={`btn btn-${variant} ${className}`.trim()}
-      disabled={disabled}
-      type={type}
+      {...componentProps}
       {...props}
     >
       {children}
-    </button>
+    </Component>
   );
 }
