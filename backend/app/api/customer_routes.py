@@ -52,15 +52,21 @@ def create_customer(
     response_model=CustomerListResponse,
     status_code=status.HTTP_200_OK,
     summary="List customers",
-    description="Retrieve customers using page-based pagination.",
+    description="Retrieve customers using page-based pagination with optional name or email search.",
     responses={422: CUSTOMER_ERROR_RESPONSES[422]},
 )
 def list_customers(
     page: int = Query(1, ge=1, description="Page number starting from 1"),
     limit: int = Query(10, ge=1, le=100, description="Number of customers per page"),
+    search: str | None = Query(
+        default=None,
+        min_length=1,
+        max_length=255,
+        description="Optional customer name or email search term",
+    ),
     service: CustomerService = Depends(get_customer_service),
 ) -> dict:
-    customers, meta = service.list_customers(page=page, limit=limit)
+    customers, meta = service.list_customers(page=page, limit=limit, search=search)
     return success_response(
         "Customers retrieved",
         {

@@ -38,12 +38,26 @@ class CustomerService:
         self.db.refresh(customer)
         return customer
 
-    def list_customers(self, page: int, limit: int) -> tuple[list[Customer], dict[str, int]]:
-        total = self.db.scalar(select(func.count(Customer.id))) or 0
+    def list_customers(
+        self,
+        page: int,
+        limit: int,
+        search: str | None = None,
+    ) -> tuple[list[Customer], dict[str, int]]:
+        query = select(Customer)
+        count_query = select(func.count(Customer.id))
+
+        if search:
+            search_filter = Customer.full_name.ilike(f"%{search}%") | Customer.email.ilike(
+                f"%{search}%"
+            )
+            query = query.where(search_filter)
+            count_query = count_query.where(search_filter)
+
+        total = self.db.scalar(count_query) or 0
         customers = list(
             self.db.scalars(
-                select(Customer)
-                .order_by(Customer.created_at.desc())
+                query.order_by(Customer.created_at.desc())
                 .offset((page - 1) * limit)
                 .limit(limit)
             )

@@ -2,6 +2,7 @@ import { Plus, Trash2 } from 'lucide-react';
 import { useEffect, useState } from 'react';
 
 import Button from '../../components/common/Button.jsx';
+import ConfirmDialog from '../../components/common/ConfirmDialog.jsx';
 import EmptyState from '../../components/common/EmptyState.jsx';
 import ErrorBanner from '../../components/common/ErrorBanner.jsx';
 import LoadingState from '../../components/common/LoadingState.jsx';
@@ -18,16 +19,19 @@ export default function CustomersPage() {
   const [customers, setCustomers] = useState([]);
   const [meta, setMeta] = useState(null);
   const [page, setPage] = useState(1);
+  const [search, setSearch] = useState('');
   const [loading, setLoading] = useState(true);
   const [submitting, setSubmitting] = useState(false);
+  const [deleting, setDeleting] = useState(false);
   const [error, setError] = useState(null);
   const [modalOpen, setModalOpen] = useState(false);
+  const [customerToDelete, setCustomerToDelete] = useState(null);
 
   async function loadCustomers(nextPage = page) {
     setLoading(true);
     setError(null);
     try {
-      const response = await customerApi.list({ page: nextPage, limit: 10 });
+      const response = await customerApi.list({ page: nextPage, limit: 10, search });
       setCustomers(response.data.items);
       setMeta(response.data.meta);
     } catch (err) {
@@ -39,7 +43,8 @@ export default function CustomersPage() {
 
   useEffect(() => {
     loadCustomers(1);
-  }, []);
+    setPage(1);
+  }, [search]);
 
   async function handleSubmit(payload) {
     setSubmitting(true);
@@ -55,14 +60,18 @@ export default function CustomersPage() {
     }
   }
 
-  async function handleDelete(customer) {
-    if (!window.confirm(`Delete ${customer.full_name}?`)) return;
+  async function handleDelete() {
+    if (!customerToDelete) return;
+    setDeleting(true);
     try {
-      await customerApi.remove(customer.id);
+      await customerApi.remove(customerToDelete.id);
       notify('Customer deleted');
+      setCustomerToDelete(null);
       await loadCustomers(page);
     } catch (err) {
       notify(err.message, 'error');
+    } finally {
+      setDeleting(false);
     }
   }
 
@@ -74,7 +83,7 @@ export default function CustomersPage() {
       key: 'actions',
       header: 'Delete',
       render: (row) => (
-        <Button variant="danger" className="icon-btn" onClick={() => handleDelete(row)}>
+        <Button variant="danger" className="icon-btn" onClick={() => setCustomerToDelete(row)}>
           <Trash2 size={16} aria-hidden="true" />
         </Button>
       ),
@@ -93,6 +102,13 @@ export default function CustomersPage() {
           </Button>
         }
       />
+      <div className="toolbar">
+        <input
+          placeholder="Search customers by name or email"
+          value={search}
+          onChange={(event) => setSearch(event.target.value)}
+        />
+      </div>
       <ErrorBanner error={error} />
       {loading ? (
         <LoadingState label="Loading customers" />
@@ -117,6 +133,19 @@ export default function CustomersPage() {
           onSubmit={handleSubmit}
         />
       </Modal>
+      <ConfirmDialog
+        open={customerToDelete !== null}
+        title="Delete Customer"
+        message={
+          customerToDelete
+            ? `Delete ${customerToDelete.full_name}? This action cannot be undone.`
+            : ''
+        }
+        confirmLabel="Delete Customer"
+        loading={deleting}
+        onCancel={() => setCustomerToDelete(null)}
+        onConfirm={handleDelete}
+      />
     </>
   );
 }

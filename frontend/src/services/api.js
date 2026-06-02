@@ -44,8 +44,8 @@ export const productApi = {
 
 export const customerApi = {
   create: (payload) => request(apiClient.post('/customers', payload)),
-  list: ({ page = 1, limit = 10 } = {}) =>
-    request(apiClient.get('/customers', { params: { page, limit } })),
+  list: ({ page = 1, limit = 10, search = '' } = {}) =>
+    request(apiClient.get('/customers', { params: { page, limit, search: search || undefined } })),
   get: (id) => request(apiClient.get(`/customers/${id}`)),
   remove: (id) => request(apiClient.delete(`/customers/${id}`)),
 };
