@@ -4,6 +4,9 @@ from uuid import UUID
 
 from pydantic import BaseModel, ConfigDict, Field
 
+from app.schemas.customer import CustomerRead
+from app.schemas.product import ProductRead
+
 
 class OrderItemCreate(BaseModel):
     product_id: UUID
@@ -20,6 +23,7 @@ class OrderItemRead(BaseModel):
     product_id: UUID
     quantity: int
     unit_price: Decimal
+    product: ProductRead
 
     model_config = ConfigDict(from_attributes=True)
 
@@ -29,6 +33,37 @@ class OrderRead(BaseModel):
     customer_id: UUID
     total_amount: Decimal
     created_at: datetime
-    items: list[OrderItemRead] = []
+    customer: CustomerRead
+    items: list[OrderItemRead] = Field(default_factory=list)
 
     model_config = ConfigDict(from_attributes=True)
+
+
+class OrderListMeta(BaseModel):
+    page: int
+    limit: int
+    total: int
+    total_pages: int
+
+
+class OrderCreateResponse(BaseModel):
+    success: bool = True
+    message: str
+    data: OrderRead
+
+
+class OrderReadResponse(BaseModel):
+    success: bool = True
+    message: str
+    data: OrderRead
+
+
+class OrderListData(BaseModel):
+    items: list[OrderRead]
+    meta: OrderListMeta
+
+
+class OrderListResponse(BaseModel):
+    success: bool = True
+    message: str
+    data: OrderListData
