@@ -6,6 +6,7 @@ from app.schemas.customer import (
     CustomerRead,
     CustomerReadResponse,
 )
+from app.schemas.dashboard import DashboardSummary, DashboardSummaryResponse
 from app.schemas.order import (
     OrderCreate,
     OrderCreateResponse,
@@ -32,6 +33,8 @@ __all__ = [
     "CustomerListResponse",
     "CustomerRead",
     "CustomerReadResponse",
+    "DashboardSummary",
+    "DashboardSummaryResponse",
     "OrderCreate",
     "OrderCreateResponse",
     "OrderItemCreate",
