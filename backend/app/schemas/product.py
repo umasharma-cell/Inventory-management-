@@ -29,3 +29,39 @@ class ProductRead(ProductBase):
     updated_at: datetime
 
     model_config = ConfigDict(from_attributes=True)
+
+
+class ProductListMeta(BaseModel):
+    page: int
+    limit: int
+    total: int
+    total_pages: int
+
+
+class ProductCreateResponse(BaseModel):
+    success: bool = True
+    message: str
+    data: ProductRead
+
+
+class ProductReadResponse(BaseModel):
+    success: bool = True
+    message: str
+    data: ProductRead
+
+
+class ProductListData(BaseModel):
+    items: list[ProductRead]
+    meta: ProductListMeta
+
+
+class ProductListResponse(BaseModel):
+    success: bool = True
+    message: str
+    data: ProductListData
+
+
+class ProductDeleteResponse(BaseModel):
+    success: bool = True
+    message: str
+    data: None = None

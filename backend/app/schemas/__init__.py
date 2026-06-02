@@ -1,6 +1,14 @@
 from app.schemas.customer import CustomerCreate, CustomerRead
 from app.schemas.order import OrderCreate, OrderItemCreate, OrderItemRead, OrderRead
-from app.schemas.product import ProductCreate, ProductRead, ProductUpdate
+from app.schemas.product import (
+    ProductCreate,
+    ProductCreateResponse,
+    ProductDeleteResponse,
+    ProductListResponse,
+    ProductRead,
+    ProductReadResponse,
+    ProductUpdate,
+)
 
 __all__ = [
     "CustomerCreate",
@@ -10,6 +18,10 @@ __all__ = [
     "OrderItemRead",
     "OrderRead",
     "ProductCreate",
+    "ProductCreateResponse",
+    "ProductDeleteResponse",
+    "ProductListResponse",
     "ProductRead",
+    "ProductReadResponse",
     "ProductUpdate",
 ]
