@@ -1,11 +1,12 @@
 import { AlertTriangle, Boxes, ClipboardList, Users } from 'lucide-react';
 import { useEffect, useState } from 'react';
 
+import BarChart from '../../components/common/BarChart.jsx';
 import ErrorBanner from '../../components/common/ErrorBanner.jsx';
 import LoadingState from '../../components/common/LoadingState.jsx';
 import StatCard from '../../components/common/StatCard.jsx';
 import Table from '../../components/common/Table.jsx';
-import { customerApi, orderApi, productApi } from '../../services/api.js';
+import { dashboardApi } from '../../services/api.js';
 
 export default function DashboardPage() {
   const [data, setData] = useState(null);
@@ -17,18 +18,8 @@ export default function DashboardPage() {
       setLoading(true);
       setError(null);
       try {
-        const [products, customers, orders] = await Promise.all([
-          productApi.list({ page: 1, limit: 100 }),
-          customerApi.list({ page: 1, limit: 1 }),
-          orderApi.list({ page: 1, limit: 1 }),
-        ]);
-        const lowStock = products.data.items.filter((product) => product.quantity_in_stock <= 5);
-        setData({
-          totalProducts: products.data.meta.total,
-          totalCustomers: customers.data.meta.total,
-          totalOrders: orders.data.meta.total,
-          lowStock,
-        });
+        const response = await dashboardApi.summary();
+        setData(response.data);
       } catch (err) {
         setError(err);
       } finally {
@@ -47,24 +38,34 @@ export default function DashboardPage() {
       {data ? (
         <>
           <section className="stats-grid">
-            <StatCard label="Total Products" value={data.totalProducts} icon={Boxes} />
-            <StatCard label="Total Customers" value={data.totalCustomers} icon={Users} />
-            <StatCard label="Total Orders" value={data.totalOrders} icon={ClipboardList} />
+            <StatCard label="Total Products" value={data.total_products} icon={Boxes} />
+            <StatCard label="Total Customers" value={data.total_customers} icon={Users} />
+            <StatCard label="Total Orders" value={data.total_orders} icon={ClipboardList} />
             <StatCard
               label="Low Stock Products"
-              value={data.lowStock.length}
+              value={data.low_stock_count}
               detail="5 units or fewer"
               icon={AlertTriangle}
             />
           </section>
+          <BarChart
+            title="Operational Snapshot"
+            description="Current totals across core inventory workflows."
+            data={[
+              { label: 'Products', value: data.total_products },
+              { label: 'Customers', value: data.total_customers },
+              { label: 'Orders', value: data.total_orders },
+              { label: 'Low Stock', value: data.low_stock_count },
+            ]}
+          />
           <section className="section-block">
             <div className="section-title">
               <h2>Low Stock Products</h2>
               <p>Items that need restocking attention.</p>
             </div>
-            {data.lowStock.length ? (
+            {data.low_stock_products.length ? (
               <Table
-                rows={data.lowStock}
+                rows={data.low_stock_products}
                 getRowKey={(row) => row.id}
                 columns={[
                   { key: 'name', header: 'Name' },

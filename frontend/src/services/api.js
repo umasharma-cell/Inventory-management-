@@ -57,3 +57,7 @@ export const orderApi = {
   get: (id) => request(apiClient.get(`/orders/${id}`)),
   remove: (id) => request(apiClient.delete(`/orders/${id}`)),
 };
+
+export const dashboardApi = {
+  summary: () => request(apiClient.get('/dashboard/summary')),
+};

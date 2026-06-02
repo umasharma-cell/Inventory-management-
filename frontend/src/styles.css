@@ -365,6 +365,57 @@ tr:last-child td {
 .section-block {
   display: grid;
   gap: 14px;
+  margin-top: 24px;
+}
+
+.chart-panel {
+  display: grid;
+  gap: 16px;
+  padding: 18px;
+  background: #ffffff;
+  border: 1px solid #dbe4e8;
+  border-radius: 8px;
+}
+
+.bar-chart {
+  display: grid;
+  grid-template-columns: repeat(4, minmax(0, 1fr));
+  gap: 14px;
+  align-items: end;
+  min-height: 220px;
+}
+
+.bar-item {
+  display: grid;
+  gap: 8px;
+  justify-items: center;
+  min-width: 0;
+}
+
+.bar-track {
+  display: flex;
+  align-items: end;
+  width: min(58px, 100%);
+  height: 150px;
+  border-radius: 8px;
+  background: #edf5f6;
+  overflow: hidden;
+}
+
+.bar-fill {
+  width: 100%;
+  border-radius: 8px 8px 0 0;
+  background: #0f7b7c;
+}
+
+.bar-item strong {
+  font-size: 18px;
+}
+
+.bar-item span {
+  color: #697985;
+  font-size: 13px;
+  text-align: center;
 }
 
 .empty-state,
@@ -549,6 +600,10 @@ tr:last-child td {
     grid-template-columns: repeat(2, minmax(0, 1fr));
   }
 
+  .bar-chart {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+  }
+
   .order-detail dl {
     grid-template-columns: 1fr;
   }
@@ -556,8 +611,22 @@ tr:last-child td {
 
 @media (max-width: 620px) {
   .stats-grid,
+  .bar-chart,
   .order-item-row {
     grid-template-columns: 1fr;
+  }
+
+  .bar-track {
+    width: 100%;
+    height: 42px;
+  }
+
+  .bar-track {
+    align-items: stretch;
+  }
+
+  .bar-fill {
+    height: 100% !important;
   }
 
   .form-actions,
